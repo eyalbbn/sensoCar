@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "186390508458",
+    "firebase_url": "https://carsense-b23f6.firebaseio.com",
+    "project_id": "carsense-b23f6",
+    "storage_bucket": "carsense-b23f6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186390508458:android:2beecdd8053c278f",
+        "android_client_info": {
+          "package_name": "elroi.carsense"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "186390508458-3et9rvmg7l1afar9ibqspgg6qna7gcv7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "elroi.carsense",
+            "certificate_hash": "26ea61ab0380f717d9a8c6caed6bff8f38a00a79"
+          }
+        },
+        {
+          "client_id": "186390508458-79pd0ead2udinvek36pm6rncpldqaoa9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxVwIzDrF4qmCzjFel6wgHUb9M63ou-Iw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "186390508458-79pd0ead2udinvek36pm6rncpldqaoa9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186390508458:android:b53bf1d53bf706fd",
+        "android_client_info": {
+          "package_name": "com.example.eyalb.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "186390508458-8kro7kr658ju3a09dmveb0f4vr2hr0kh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.eyalb.myapplication",
+            "certificate_hash": "39a8e7a0fecb6f5ec777f50224f49f853055d092"
+          }
+        },
+        {
+          "client_id": "186390508458-79pd0ead2udinvek36pm6rncpldqaoa9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxVwIzDrF4qmCzjFel6wgHUb9M63ou-Iw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "186390508458-79pd0ead2udinvek36pm6rncpldqaoa9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
