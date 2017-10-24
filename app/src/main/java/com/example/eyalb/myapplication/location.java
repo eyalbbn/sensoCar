@@ -40,8 +40,7 @@ public class location implements LocationListener {
         lMan = (LocationManager) mContext.getSystemService(mContext.LOCATION_SERVICE);
     }
 
-    public void createFiles() {
-        File path = new File(Environment.getExternalStorageDirectory(), "CarSensorsApp");
+    public void createFiles(File path) {
 
         file = new File(path, "location.csv");
 
@@ -70,8 +69,8 @@ public class location implements LocationListener {
     }
 
 
-    public void upload(String curr_date) {
-        fileManager.upload(uri, curr_date);
+    public void upload() {
+        fileManager.upload(file);
     }
 
     public void startExamining(Activity activity) {

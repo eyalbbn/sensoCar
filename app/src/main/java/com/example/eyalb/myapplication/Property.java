@@ -99,8 +99,8 @@ public class Property {
         mediaRecorder.setOutputFile(uri.getPath());
     }
 
-    public void upload(String curr_date) {
-        fileManager.upload(uri, curr_date);
-        fileManager.upload(Uri.fromFile(doc), curr_date);
+    public void upload() {
+        fileManager.upload(file);
+        fileManager.upload(doc);
     }
 }

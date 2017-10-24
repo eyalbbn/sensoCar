@@ -79,8 +79,8 @@ public class sensor {
     }
 
 
-    Uri getUri() {
-        return uri;
+    File getFile() {
+        return file;
     }
 
     Sensor getSensor() {

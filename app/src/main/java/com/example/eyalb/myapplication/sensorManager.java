@@ -10,7 +10,7 @@ import java.io.File;
 
 public class sensorManager implements SensorEventListener {
 
-    private static final int NUM_OF_SENSORS = 6;
+    private static final int NUM_OF_SENSORS = 5;
 
     private Context mContext;
 
@@ -27,8 +27,7 @@ public class sensorManager implements SensorEventListener {
         sensors[1] = new sensor("gyro", Sensor.TYPE_GYROSCOPE);
         sensors[2] = new sensor("liac", Sensor.TYPE_LINEAR_ACCELERATION);
         sensors[3] = new sensor("grav", Sensor.TYPE_GRAVITY);
-        sensors[4] = new sensor("prox", Sensor.TYPE_PROXIMITY);
-        sensors[5] = new sensor("rott", Sensor.TYPE_ROTATION_VECTOR);
+        sensors[4] = new sensor("rott", Sensor.TYPE_ROTATION_VECTOR);
 
         sMan = (SensorManager) mContext.getSystemService(mContext.SENSOR_SERVICE);
         for (int i = 0; i < NUM_OF_SENSORS; i++) {
@@ -71,12 +70,11 @@ public class sensorManager implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 
-    public void upload(String curr_date) {
+    public void upload() {
         for (int i = 0; i < NUM_OF_SENSORS; i++) {
-            fileManager.upload(sensors[i].getUri(), curr_date);
+            fileManager.upload(sensors[i].getFile());
         }
     }
 }

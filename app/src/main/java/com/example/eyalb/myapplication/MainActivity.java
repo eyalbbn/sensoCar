@@ -4,18 +4,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
-import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,8 +24,6 @@ public class MainActivity extends AppCompatActivity {
     private fileManager fileManager;
 
     private location mLocation;
-
-    private File path = new File(Environment.getExternalStorageDirectory(), "CarSensorsApp");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,15 +48,15 @@ public class MainActivity extends AppCompatActivity {
     public boolean fileInit() {
         try {
             // Make sure the path directory exists.
-            if (!path.exists()) {
+            if (!fileManager.getCurrFolder().exists()) {
                 // Make it, if it doesn't exit
-                path.mkdirs();
+                fileManager.getCurrFolder().mkdirs();
             }
 
-            if (!sensorManager.createFiles(path))
+            if (!sensorManager.createFiles(fileManager.getCurrFolder()))
                 return false;
 
-            mLocation.createFiles();
+            mLocation.createFiles(fileManager.getCurrFolder());
 
             return true;
         } catch (Exception e) {
@@ -91,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         fileInit();
 
         sensorManager.register();
-        property.startExamining(path);
+        property.startExamining(fileManager.getCurrFolder());
         mLocation.startExamining(this);
 
     }
@@ -101,10 +93,6 @@ public class MainActivity extends AppCompatActivity {
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
 
-        DateFormat df = new SimpleDateFormat("dd-MM-yy HH:mm:ss");
-        Date date = new Date();
-        String curr_date = df.format(date);
-
         property.stopExamining();
         mLocation.stopExamining();
         sensorManager.unregister();
@@ -113,13 +101,16 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), "Uploading started...", Toast.LENGTH_SHORT).show();
 
-        sensorManager.upload(curr_date);
+        sensorManager.upload();
 
-        property.upload(curr_date);
+        property.upload();
 
-        mLocation.upload(curr_date);
+        mLocation.upload();
 
-        Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
+        if (fileManager.IsFolderEmpty())
+            Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(getApplicationContext(), "There is an error, Please try again later", Toast.LENGTH_LONG).show();
 
     }
 
@@ -158,9 +149,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        DateFormat df = new SimpleDateFormat("dd-MM-yy HH:mm:ss");
-        Date date = new Date();
-        String curr_date = df.format(date);
+        if (startButton.isEnabled())
+            return;
 
         property.stopExamining();
         mLocation.stopExamining();
@@ -169,13 +159,17 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), "Recording Stopped, Uploading data", Toast.LENGTH_SHORT).show();
 
-        sensorManager.upload(curr_date);
+        sensorManager.upload();
 
-        property.upload(curr_date);
+        property.upload();
 
-        mLocation.upload(curr_date);
+        mLocation.upload();
 
-        Toast.makeText(getApplicationContext(), "Uploading complete", Toast.LENGTH_SHORT).show();
+        if (fileManager.IsFolderEmpty())
+            Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(getApplicationContext(), "There is an error, Please try again later", Toast.LENGTH_LONG).show();
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(notification_id);
 
