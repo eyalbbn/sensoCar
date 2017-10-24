@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,7 +22,7 @@ import java.util.Date;
 
 public class fileManager {
 
-    private File path = new File(Environment.getExternalStorageDirectory(), "CarSensorsApp");
+    private final File path;
     private File currFolder;
     private String curr_date;
 
@@ -38,12 +37,25 @@ public class fileManager {
         DateFormat df = new SimpleDateFormat("dd-MM-yy HH:mm:ss");
         Date date = new Date();
         curr_date = df.format(date);
+        path = new File(Environment.getExternalStorageDirectory(), "CarSensorsApp");
         currFolder = new File(path, curr_date);
     }
 
     public void upload(final File file) {
         final Uri uri = Uri.fromFile(file);
         StorageReference sRef = mStorageRef.child(anonymousUid + "/" + curr_date + "/" + uri.getLastPathSegment());
+
+        sRef.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                file.delete();
+            }
+        });
+    }
+
+    public void upload(final File file, String folderName) {
+        final Uri uri = Uri.fromFile(file);
+        StorageReference sRef = mStorageRef.child(anonymousUid + "/" + folderName + "/" + uri.getLastPathSegment());
 
         sRef.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -67,7 +79,7 @@ public class fileManager {
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 anonymousUid = user.getUid();
                             } else {
-                                anonymousUid = "failed";
+                                anonymousUid = "Failed";
                             }
                         }
                     });
@@ -78,12 +90,21 @@ public class fileManager {
         return currFolder;
     }
 
-    public boolean IsFolderEmpty() {
-        String[] files = currFolder.list();
-        if (files.length == 0) {
-            currFolder.delete();
-            return true;
+    public File getPath() {
+        return path;
+    }
+
+    public boolean IsFolderEmpty(File folder) {
+        if (folder.isDirectory()) {
+            String[] files = folder.list();
+            if (files.length == 0)
+                return true;
         }
         return false;
+    }
+
+    public void deleteFolder(File folder)
+    {
+        folder.delete();
     }
 }

@@ -9,12 +9,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
     private Button startButton;
     private Button stopButton;
+    private Button uploadButton;
+    private TextView readyToUpload;
+
 
     private NotificationCompat.Builder builder;
     private static final int notification_id = 451234;
@@ -42,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
         startButton = (Button) findViewById(R.id.start);
         stopButton = (Button) findViewById(R.id.stop);
         stopButton.setEnabled(false);
+        uploadButton = (Button) findViewById(R.id.upload);
+        readyToUpload = (TextView) findViewById(R.id.uploadMessage);
+
+        if (fileManager.IsFolderEmpty(fileManager.getPath()))
+            readyToUpload.setVisibility(View.INVISIBLE);
     }
 
 
@@ -79,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
+        uploadButton.setEnabled(false);
 
         fileInit();
 
@@ -92,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
+        uploadButton.setEnabled(true);
 
         property.stopExamining();
         mLocation.stopExamining();
@@ -107,13 +120,38 @@ public class MainActivity extends AppCompatActivity {
 
         mLocation.upload();
 
-        if (fileManager.IsFolderEmpty())
+        if (fileManager.IsFolderEmpty(fileManager.getCurrFolder())) {
             Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
+            fileManager.deleteFolder(fileManager.getCurrFolder());
+        }
         else
             Toast.makeText(getApplicationContext(), "There is an error, Please try again later", Toast.LENGTH_LONG).show();
 
     }
 
+    public void onUploadClick(View view) {
+        if (fileManager.IsFolderEmpty(fileManager.getPath())) {
+            Toast.makeText(this, "All files are already uploaded", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File[] files = fileManager.getPath().listFiles();
+        for(int i=0 ; i<files.length; i++)
+        {
+            String folderName = files[i].getName();
+            File[] contents = files[i].listFiles();
+            for(int j=0; j<contents.length; j++)
+                fileManager.upload(contents[j], folderName);
+            if(fileManager.IsFolderEmpty(files[i]))
+                fileManager.deleteFolder(files[i]);
+        }
+
+        if (fileManager.IsFolderEmpty(fileManager.getPath())) {
+            Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
+            readyToUpload.setVisibility(View.INVISIBLE);
+        }
+        else
+            Toast.makeText(getApplicationContext(), "There is an error, Please try again later", Toast.LENGTH_LONG).show();
+    }
 
     @Override
     public void onStart() {
@@ -165,8 +203,10 @@ public class MainActivity extends AppCompatActivity {
 
         mLocation.upload();
 
-        if (fileManager.IsFolderEmpty())
+        if (fileManager.IsFolderEmpty(fileManager.getCurrFolder())) {
             Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
+            fileManager.deleteFolder(fileManager.getCurrFolder());
+        }
         else
             Toast.makeText(getApplicationContext(), "There is an error, Please try again later", Toast.LENGTH_LONG).show();
 
