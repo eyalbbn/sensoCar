@@ -1,6 +1,5 @@
 package com.example.eyalb.myapplication;
 
-import android.*;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -8,9 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -26,7 +23,6 @@ import java.util.Date;
 
 public class location implements LocationListener {
 
-    private Uri uri;
     private FileOutputStream outputStream;
     private OutputStreamWriter streamWriter;
     private File file;
@@ -44,7 +40,6 @@ public class location implements LocationListener {
 
         file = new File(path, "location.csv");
 
-        uri = Uri.fromFile(file);
         try {
             file.createNewFile();
             outputStream = new FileOutputStream(file);
@@ -74,11 +69,7 @@ public class location implements LocationListener {
     }
 
     public void startExamining(Activity activity) {
-        if (!lMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(mContext, "Enable GPS", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        //enable internet toast
+
         ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
                 android.Manifest.permission.INTERNET, android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 android.Manifest.permission.RECORD_AUDIO}, 11);
@@ -93,6 +84,11 @@ public class location implements LocationListener {
 
     public void stopExamining() {
         lMan.removeUpdates(this);
+    }
+
+    public LocationManager getManager()
+    {
+        return lMan;
     }
 
 
