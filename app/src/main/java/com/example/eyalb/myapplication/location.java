@@ -8,10 +8,14 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,11 +33,16 @@ public class location implements LocationListener {
     private fileManager fileManager;
     private LocationManager lMan;
     private Context mContext;
+    private TextView speedometer;
 
-    public location(fileManager fMan, Context c) {
+    private Handler timeouthandler;
+
+    public location(fileManager fMan, TextView view, Context c) {
         fileManager = fMan;
         mContext = c;
+        speedometer = view;
         lMan = (LocationManager) mContext.getSystemService(mContext.LOCATION_SERVICE);
+        timeouthandler = new Handler();
     }
 
     public void createFiles(File path) {
@@ -86,16 +95,28 @@ public class location implements LocationListener {
         lMan.removeUpdates(this);
     }
 
-    public LocationManager getManager()
-    {
+    public LocationManager getManager() {
         return lMan;
     }
 
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(final Location location) {
+        timeouthandler.removeCallbacksAndMessages(null);
+        getSample(location);
+        timeouthandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getSample(location);
+            }
+        }, 15000);
+    }
+
+    private void getSample(Location location) {
         try {
-            streamWriter.write(location.getLatitude() + "," + location.getLongitude() + ",");
+            float currentSpeed = location.getSpeed();
+            streamWriter.write(location.getLatitude() + "," + location.getLongitude() + "," + currentSpeed + ",");
+            speedometer.setText(currentSpeed * 3.6 + "km/h");
             DateFormat df = new SimpleDateFormat("dd/MM/yy");
             Date date = new Date();
             streamWriter.write(df.format(date));
@@ -103,6 +124,7 @@ public class location implements LocationListener {
             df = new SimpleDateFormat("HH:mm:ss");
             streamWriter.write(df.format(date));
             streamWriter.write("\n");
+
         } catch (Exception e) {
             Log.d("Error", e.toString());
         }

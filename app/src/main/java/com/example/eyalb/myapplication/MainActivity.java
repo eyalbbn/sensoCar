@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -36,36 +37,42 @@ public class MainActivity extends AppCompatActivity {
         builder = new NotificationCompat.Builder(this);
         builder.setAutoCancel(true);
 
-        fileManager = new fileManager();
+        fileManager = new fileManager(this);
         sensorManager = new sensorManager(this, fileManager);
         property = new Property("media", fileManager);
 
-        mLocation = new location(fileManager, this);
+        mLocation = new location(fileManager, (TextView) findViewById(R.id.textView2), this);
 
         startButton = (Button) findViewById(R.id.start);
         stopButton = (Button) findViewById(R.id.stop);
         stopButton.setEnabled(false);
 
-        if (!fileManager.IsFolderEmpty(fileManager.getPath())) {
-            File[] files = fileManager.getPath().listFiles();
-            for (File file : files) {
-                String folderName = file.getName();
-                File[] contents = file.listFiles();
-                for (File content : contents) fileManager.upload(content, folderName);
-                if (fileManager.IsFolderEmpty(file))
-                    fileManager.deleteFolder(file);
+        // Check if user is signed in (non-null) and update UI accordingly.
+        fileManager.checkForSignedUser(this);
+
+        if (fileManager.getPath().exists())
+            if (!fileManager.IsFolderEmpty(fileManager.getPath())) {
+                File[] folders = fileManager.getPath().listFiles();
+                for (File folder : folders) {
+                    String folderName = folder.getName();
+                    File[] contents = folder.listFiles();
+                    for (File content : contents) fileManager.upload(content, folderName);
+                    if (fileManager.IsFolderEmpty(folder))
+                        fileManager.deleteFolder(folder);
+                }
             }
-        }
     }
 
 
     public boolean fileInit() {
         try {
             // Make sure the path directory exists.
-            if (!fileManager.getCurrFolder().exists()) {
+            if (!fileManager.getPath().exists()) {
                 // Make it, if it doesn't exit
-                fileManager.getCurrFolder().mkdirs();
+                fileManager.getPath().mkdirs();
             }
+
+            fileManager.setCurrFolder();
 
             if (!sensorManager.createFiles(fileManager.getCurrFolder()))
                 return false;
@@ -127,18 +134,11 @@ public class MainActivity extends AppCompatActivity {
         mLocation.upload();
 
         if (fileManager.IsFolderEmpty(fileManager.getCurrFolder())) {
-            Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
             fileManager.deleteFolder(fileManager.getCurrFolder());
-        } else
-            Toast.makeText(getApplicationContext(), "There is an error, Please try again later", Toast.LENGTH_LONG).show();
+        }
 
-    }
+        Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        fileManager.checkForSignedUser(this);
     }
 
     @Override

@@ -1,11 +1,13 @@
 package com.example.eyalb.myapplication;
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -16,6 +18,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,20 +33,19 @@ public class fileManager {
     private FirebaseAuth mAuth;
     private String anonymousUid;
 
-    public fileManager() {
+    private Context context;
+
+    public fileManager(Context mContext) {
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
-
-        DateFormat df = new SimpleDateFormat("dd-MM-yy HH:mm:ss");
-        Date date = new Date();
-        curr_date = df.format(date);
         path = new File(Environment.getExternalStorageDirectory(), "CarSensorsApp");
-        currFolder = new File(path, curr_date);
+
+        context = mContext;
     }
 
     public void upload(final File file) {
         final Uri uri = Uri.fromFile(file);
-        StorageReference sRef = mStorageRef.child(anonymousUid + "/" + curr_date + "/" + uri.getLastPathSegment());
+        StorageReference sRef = mStorageRef.child(context.getString(R.string.version) + "/" + anonymousUid + "/" + curr_date + "/" + uri.getLastPathSegment());
 
         sRef.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -55,7 +57,7 @@ public class fileManager {
 
     public void upload(final File file, String folderName) {
         final Uri uri = Uri.fromFile(file);
-        StorageReference sRef = mStorageRef.child(anonymousUid + "/" + folderName + "/" + uri.getLastPathSegment());
+        StorageReference sRef = mStorageRef.child(context.getString(R.string.version) + "/" + anonymousUid + "/" + folderName + "/" + uri.getLastPathSegment());
 
         sRef.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -78,9 +80,13 @@ public class fileManager {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 anonymousUid = user.getUid();
-                            } else {
-                                anonymousUid = "Failed";
                             }
+                        }
+                    })
+                    .addOnFailureListener(activity, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            anonymousUid = "Failed";
                         }
                     });
         }
@@ -103,8 +109,15 @@ public class fileManager {
         return false;
     }
 
-    public void deleteFolder(File folder)
-    {
+    public void deleteFolder(File folder) {
         folder.delete();
+    }
+
+    public void setCurrFolder() throws IOException {
+        DateFormat df = new SimpleDateFormat("dd-MM-yy HH:mm:ss");
+        Date date = new Date();
+        curr_date = df.format(date);
+        currFolder = new File(path, curr_date);
+        currFolder.mkdir();
     }
 }

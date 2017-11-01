@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">SensoCar v2.0.0</string>
+    <string name="app_name">SensoCar</string>
+    <string name="version">v2</string>
 </resources>

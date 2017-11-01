@@ -10,7 +10,7 @@ import java.io.File;
 
 public class sensorManager implements SensorEventListener {
 
-    private static final int NUM_OF_SENSORS = 5;
+    private static final int NUM_OF_SENSORS = 6;
 
     private Context mContext;
 
@@ -28,6 +28,8 @@ public class sensorManager implements SensorEventListener {
         sensors[2] = new sensor("liac", Sensor.TYPE_LINEAR_ACCELERATION);
         sensors[3] = new sensor("grav", Sensor.TYPE_GRAVITY);
         sensors[4] = new sensor("rott", Sensor.TYPE_ROTATION_VECTOR);
+        sensors[5] = new sensor("magn", Sensor.TYPE_MAGNETIC_FIELD);
+
 
         sMan = (SensorManager) mContext.getSystemService(mContext.SENSOR_SERVICE);
         for (int i = 0; i < NUM_OF_SENSORS; i++) {
