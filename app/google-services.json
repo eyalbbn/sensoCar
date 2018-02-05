@@ -93,6 +93,50 @@
           "status": 2
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186390508458:android:3cf694e5472b9ebc",
+        "android_client_info": {
+          "package_name": "app.SensoCar.eyalb.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "186390508458-82p572janihol12b2uh2gdb1l54sje4k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.SensoCar.eyalb.myapplication",
+            "certificate_hash": "39a8e7a0fecb6f5ec777f50224f49f853055d092"
+          }
+        },
+        {
+          "client_id": "186390508458-79pd0ead2udinvek36pm6rncpldqaoa9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxVwIzDrF4qmCzjFel6wgHUb9M63ou-Iw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "186390508458-79pd0ead2udinvek36pm6rncpldqaoa9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
     }
   ],
   "configuration_version": "1"

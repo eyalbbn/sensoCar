@@ -1,4 +1,4 @@
-package com.example.eyalb.myapplication;
+package app.SensoCar.eyalb.myapplication;
 
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -11,7 +11,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Property {
+public class Property implements propertyInterface {
     private String name;
     private Uri uri;
     private File file;
@@ -35,10 +35,8 @@ public class Property {
         end = new Date();
     }
 
-    public void startExamining(File path) {
-        setStart();
-        /* implement your code here */
-
+    @Override
+    public void init(File path) {
         try {
             file = new File(path, name + "Output.mp3");
             uri = Uri.fromFile(file);
@@ -46,6 +44,10 @@ public class Property {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void startExamining() {
+        setStart();
 
         MediaRecorderReady();
 
@@ -53,10 +55,8 @@ public class Property {
             mediaRecorder.prepare();
             mediaRecorder.start();
         } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -76,9 +76,7 @@ public class Property {
 
 
             DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
-            streamWriter.write("start: " + df.format(start));
-            streamWriter.write("\n");
-            streamWriter.write("end: " + df.format(end));
+            streamWriter.write("start: " + df.format(start)+"\nend: " + df.format(end));
 
             streamWriter.close();
 

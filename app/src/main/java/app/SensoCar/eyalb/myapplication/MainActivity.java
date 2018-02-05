@@ -1,19 +1,21 @@
-package com.example.eyalb.myapplication;
+package app.SensoCar.eyalb.myapplication;
 
+import android.Manifest;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,35 +34,40 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        builder = new NotificationCompat.Builder(this);
-        builder.setAutoCancel(true);
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.INTERNET, android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                android.Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_NETWORK_STATE}, 10);
 
         fileManager = new fileManager(this);
         sensorManager = new sensorManager(this, fileManager);
         property = new Property("media", fileManager);
 
+        // Check if user is signed in (non-null) and update UI accordingly.
+        if (!fileManager.checkForSignedUser()) {
+            changeScreens(null);
+        }
+
+        setContentView(R.layout.activity_main);
+
+        builder = new NotificationCompat.Builder(this);
+        builder.setAutoCancel(true);
+
         mLocation = new location(fileManager, (TextView) findViewById(R.id.textView2), this);
 
-        startButton = (Button) findViewById(R.id.start);
-        stopButton = (Button) findViewById(R.id.stop);
-        stopButton.setEnabled(false);
+        startButton = findViewById(R.id.start);
+        stopButton = findViewById(R.id.stop);
 
-        // Check if user is signed in (non-null) and update UI accordingly.
-        fileManager.checkForSignedUser(this);
+    }
 
-        if (fileManager.getPath().exists())
-            if (!fileManager.IsFolderEmpty(fileManager.getPath())) {
-                File[] folders = fileManager.getPath().listFiles();
-                for (File folder : folders) {
-                    String folderName = folder.getName();
-                    File[] contents = folder.listFiles();
-                    for (File content : contents) fileManager.upload(content, folderName);
-                    if (fileManager.IsFolderEmpty(folder))
-                        fileManager.deleteFolder(folder);
-                }
-            }
+    public void changeScreens(View view) {
+        Intent intent = new Intent(this, FormActivity.class);
+        final int result = 1;
+        try {
+            this.startActivityForResult(intent, result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -73,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             fileManager.setCurrFolder();
+            property.init(fileManager.getCurrFolder());
 
             if (!sensorManager.createFiles(fileManager.getCurrFolder()))
                 return false;
@@ -103,10 +111,15 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+            fileInit();
+        else
+            return;
+
         fileInit();
 
         sensorManager.register();
-        property.startExamining(fileManager.getCurrFolder());
+        property.startExamining();
         mLocation.startExamining(this);
 
         stopButton.setEnabled(true);
@@ -119,13 +132,13 @@ public class MainActivity extends AppCompatActivity {
         property.stopExamining();
         mLocation.stopExamining();
         sensorManager.unregister();
+        TextView tv = findViewById(R.id.textView2);
+        tv.setText("0.0 km/h");
 
         fileFin();
 
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
-
-        Toast.makeText(getApplicationContext(), "Uploading started...", Toast.LENGTH_SHORT).show();
 
         sensorManager.upload();
 
@@ -136,9 +149,6 @@ public class MainActivity extends AppCompatActivity {
         if (fileManager.IsFolderEmpty(fileManager.getCurrFolder())) {
             fileManager.deleteFolder(fileManager.getCurrFolder());
         }
-
-        Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
-
     }
 
     @Override
@@ -161,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentIntent(pendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(notification_id, builder.build());
+        notificationManager.notify("SensoCar", notification_id, builder.build());
     }
 
     @Override
@@ -176,22 +186,29 @@ public class MainActivity extends AppCompatActivity {
         sensorManager.unregister();
         fileFin();
 
-        Toast.makeText(getApplicationContext(), "Recording Stopped, Uploading data", Toast.LENGTH_SHORT).show();
-
-        sensorManager.upload();
-
-        property.upload();
-
-        mLocation.upload();
-
-        if (fileManager.IsFolderEmpty(fileManager.getCurrFolder())) {
-            Toast.makeText(getApplicationContext(), "Uploading complete.", Toast.LENGTH_SHORT).show();
-            fileManager.deleteFolder(fileManager.getCurrFolder());
-        } else
-            Toast.makeText(getApplicationContext(), "There is an error, Please try again later", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "ההקלטה נעצרה הקבצים יועלו בפעם הבאה שתתחברו", Toast.LENGTH_LONG).show();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(notification_id);
+        notificationManager.cancel("SensoCar", notification_id);
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (fileManager.signUser(this, data)) {
+            setRedo(View.INVISIBLE);
+            Toast.makeText(this, "הפרטים נשמרו בהצלחה", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    public void setRedo(int visibility) {
+        findViewById(R.id.redoForm).setVisibility(visibility);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.eyalb.myapplication;
+package app.SensoCar.eyalb.myapplication;
 
 import android.Manifest;
 import android.app.Activity;
@@ -15,14 +15,10 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class location implements LocationListener {
@@ -33,16 +29,17 @@ public class location implements LocationListener {
     private fileManager fileManager;
     private LocationManager lMan;
     private Context mContext;
+    private Activity mActivity;
     private TextView speedometer;
 
-    private Handler timeouthandler;
+    private Handler timeoutHandler;
 
     public location(fileManager fMan, TextView view, Context c) {
         fileManager = fMan;
         mContext = c;
         speedometer = view;
         lMan = (LocationManager) mContext.getSystemService(mContext.LOCATION_SERVICE);
-        timeouthandler = new Handler();
+        timeoutHandler = new Handler();
     }
 
     public void createFiles(File path) {
@@ -53,7 +50,8 @@ public class location implements LocationListener {
             file.createNewFile();
             outputStream = new FileOutputStream(file);
             streamWriter = new OutputStreamWriter(outputStream);
-
+            streamWriter = new OutputStreamWriter(outputStream);
+            streamWriter.write("latitude,longitude,speed,elapsed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,6 +77,7 @@ public class location implements LocationListener {
 
     public void startExamining(Activity activity) {
 
+        mActivity = activity;
         ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
                 android.Manifest.permission.INTERNET, android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 android.Manifest.permission.RECORD_AUDIO}, 11);
@@ -102,32 +101,58 @@ public class location implements LocationListener {
 
     @Override
     public void onLocationChanged(final Location location) {
-        timeouthandler.removeCallbacksAndMessages(null);
+        timeoutHandler.removeCallbacksAndMessages(null);
         getSample(location);
-        timeouthandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getSample(location);
-            }
-        }, 15000);
     }
 
-    private void getSample(Location location) {
+    private void getSample(final Location location) {
         try {
-            float currentSpeed = location.getSpeed();
-            streamWriter.write(location.getLatitude() + "," + location.getLongitude() + "," + currentSpeed + ",");
-            speedometer.setText(currentSpeed * 3.6 + "km/h");
-            DateFormat df = new SimpleDateFormat("dd/MM/yy");
-            Date date = new Date();
-            streamWriter.write(df.format(date));
-            streamWriter.write(",");
-            df = new SimpleDateFormat("HH:mm:ss");
-            streamWriter.write(df.format(date));
             streamWriter.write("\n");
+            float currentSpeed = location.getSpeed();
+            streamWriter.write(location.getLatitude() + "," + location.getLongitude() + "," + currentSpeed * 3.6 + ",");
+            speedometer.setText(Float.parseFloat(String.valueOf(currentSpeed * 3.6)) + " km/h");
+            String time = calculateElapsed();
+            streamWriter.write(time);
+            timeoutHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
 
+                    if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(mContext, "Permission not granted", Toast.LENGTH_LONG).show();
+                    }
+
+                    lMan.requestSingleUpdate(LocationManager.GPS_PROVIDER, new LocationListener() {
+                        @Override
+                        public void onLocationChanged(Location mlocation) {
+
+                            getSample(mlocation);
+                        }
+
+                        @Override public void onStatusChanged(String provider, int status, Bundle extras) { }
+                        @Override public void onProviderEnabled(String provider) { }
+                        @Override public void onProviderDisabled(String provider) { }
+                    }, null);
+                }
+            }, 8000);
         } catch (Exception e) {
             Log.d("Error", e.toString());
         }
+    }
+
+    private String calculateElapsed() {
+        Date date = new Date();
+        long different = date.getTime() - fileManager.getCurrDate().getTime();
+
+        long secondsInMilli = 1000;
+
+        long elapsedSeconds = different / secondsInMilli;
+        different = different % secondsInMilli;
+
+        if(String.valueOf(different).length() == 1)
+            return elapsedSeconds + ".00" + different;
+        else if(String.valueOf(different).length() == 2)
+            return elapsedSeconds + ".0" + different;
+        return elapsedSeconds + "." + different;
     }
 
     @Override

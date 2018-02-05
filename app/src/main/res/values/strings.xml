@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SensoCar</string>
-    <string name="version">v2</string>
+    <string name="version">v4</string>
+    <string name="welcome">תודה רבה שבחרתם להשתמש באפליקציה שלנו נשמח אם תוכלו לענות על מספר שאלות קצרות</string>
 </resources>
